@@ -1,0 +1,11 @@
+transformers
+datasets
+torch
+scikit-learn
+fastapi
+uvicorn[standard]
+python-multipart
+shap
+accelerate
+protobuf
+evaluate
