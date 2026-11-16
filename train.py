@@ -95,16 +95,13 @@ test_dataset = tokenized_datasets["test"]
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
 # --- 4. Evaluation Metric ---
-print("Loading evaluation metric: accuracy")
+print("Loading evaluation metric: f1")
 try:
-    metric = evaluate.load("accuracy")
+    metric = evaluate.load("f1")
 except Exception as e:
-    print(f"Failed to load 'accuracy' metric. Trying 'f1' as a fallback. Error: {e}")
-    try:
-        metric = evaluate.load("f1")
-    except Exception as e2:
-        print(f"Failed to load 'f1' metric. Training will proceed without metric calculation. Error: {e2}")
-        metric = None
+    print(f"Failed to load 'f1' metric. Training will proceed without metric calculation. Error: {e}")
+    metric = None
+
 
 def compute_metrics(eval_pred):
     if metric is None:
@@ -112,11 +109,15 @@ def compute_metrics(eval_pred):
         
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
-    
-    if metric.name == "f1":
-        return metric.compute(predictions=predictions, references=labels, average="weighted")
-    else:
-        return metric.compute(predictions=predictions, references=labels)
+
+    # For defect detection, LABEL_1 is the positive/buggy class.
+    # Use binary F1 so the score reflects the buggy class specifically.
+    return metric.compute(
+        predictions=predictions,
+        references=labels,
+        average="binary",
+        zero_division=0,
+    )
 
 # --- 5. Training ---
 print("Setting up training arguments...")
