@@ -1,0 +1,25 @@
+name: Run Bash Script
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Adds a manual "Run workflow" button in the Actions tab
+
+jobs:
+  run-bash:
+    runs-on: ubuntu-latest # Runs on a Linux virtual machine where Bash is the default shell
+
+    steps:
+      - name: Checkout repository files
+        uses: actions/checkout@v4
+
+      - name: Run inline Bash commands
+        run: |
+          echo "Listing files in the repo:"
+          ls -la
+          echo "Current branch: $GITHUB_REF_NAME"
+
+      - name: Run an existing .sh script
+        run: |
+          chmod +x ./my-script.sh
+          ./my-script.sh
